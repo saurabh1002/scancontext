@@ -37,7 +37,7 @@ def distance_sc(sc1, sc2):
     return dist
 
 if __name__ == "__main__":
-    from python.make_sc_example import *
+    from make_sc_example import *
     bin_dir = '../sample_data/KITTI/00/velodyne/'
     bin_db = kitti_vlp_database(bin_dir)
     SCs = []

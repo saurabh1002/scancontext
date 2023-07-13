@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from open3d import *
+import open3d as o3d
 
 
 class kitti_vlp_database:
@@ -113,15 +113,15 @@ class ScanContext:
         ptcloud_xyz = self.load_velo_scan()
         print("The number of original points: " + str(ptcloud_xyz.shape) ) 
     
-        pcd = PointCloud()
-        pcd.points = Vector3dVector(ptcloud_xyz)
-        downpcd = voxel_down_sample(pcd, voxel_size = ScanContext.downcell_size)
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(ptcloud_xyz)
+        downpcd = pcd.voxel_down_sample(voxel_size = ScanContext.downcell_size)
         ptcloud_xyz_downed = np.asarray(downpcd.points)
         print("The number of downsampled points: " + str(ptcloud_xyz_downed.shape) ) 
         # draw_geometries([downpcd])
     
         if(ScanContext.viz):
-            draw_geometries([downpcd])
+            o3d.visualization.draw_geometries([downpcd])
             
         self.SCs = []
         for res in range(len(ScanContext.sector_res)):
@@ -146,7 +146,6 @@ class ScanContext:
 
     
 if __name__ == "__main__":
-
     bin_dir = './data/'
     bin_db = kitti_vlp_database(bin_dir)
     
