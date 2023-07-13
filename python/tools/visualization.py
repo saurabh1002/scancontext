@@ -19,19 +19,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from setuptools import find_packages
-from skbuild import setup
+import copy
+from typing import List
 
-setup(
-    packages=find_packages(),
-    cmake_install_dir="pybind/",
-    cmake_install_target="install_python_bindings",
-    entry_points={"console_scripts": ["scan_context_pipeline=python.tools.cmd:run"]},
-    install_requires=[
-        "numpy",
-        "typer[all]>=0.6.0",
-        "open3d>=0.13",
-        "tqdm",
-        "plyfile",
-    ],
-)
+import cv2
+import numpy as np
+
+
+def draw_scan_context(scan_contexts: List[np.ndarray]) -> None:
+    for i, scan_context in enumerate(scan_contexts):
+        cv2.imshow(f"Scan Context {i}", scan_context)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()

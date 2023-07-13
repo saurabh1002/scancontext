@@ -1,20 +1,16 @@
 #include "ScanContext.hpp"
 
 #include <Eigen/Core>
-#include <iostream>
 #include <memory>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 using std::atan2;
 using std::cos;
 using std::sin;
 
-// namespace SC2
-// {
-
-void coreImportTest(void) {
-    std::cout << "scancontext lib is successfully imported." << std::endl;
-}  // coreImportTest
+using Eigen::MatrixXd, Eigen::Vector3d, Eigen::VectorXd;
 
 float rad2deg(float radians) { return radians * 180.0 / M_PI; }
 
@@ -123,7 +119,7 @@ std::pair<double, int> SCManager::distanceBtnScanContext(MatrixXd &_sc1, MatrixX
 
 }  // distanceBtnScanContext
 
-MatrixXd SCManager::makeScancontext(const std::vector<Eigen::Vector3d> &_scan_down) {
+MatrixXd SCManager::makeScancontext(const std::vector<Vector3d> &_scan_down) {
     int num_pts_scan_down = _scan_down.size();
 
     // main
@@ -161,36 +157,36 @@ MatrixXd SCManager::makeScancontext(const std::vector<Eigen::Vector3d> &_scan_do
     return desc;
 }  // SCManager::makeScancontext
 
-MatrixXd SCManager::makeRingkeyFromScancontext(Eigen::MatrixXd &_desc) {
+MatrixXd SCManager::makeRingkeyFromScancontext(MatrixXd &_desc) {
     /*
      * summary: rowwise mean vector
      */
-    Eigen::MatrixXd invariant_key(_desc.rows(), 1);
+    MatrixXd invariant_key(_desc.rows(), 1);
     for (int row_idx = 0; row_idx < _desc.rows(); row_idx++) {
-        Eigen::MatrixXd curr_row = _desc.row(row_idx);
+        MatrixXd curr_row = _desc.row(row_idx);
         invariant_key(row_idx, 0) = curr_row.mean();
     }
 
     return invariant_key;
 }  // SCManager::makeRingkeyFromScancontext
 
-MatrixXd SCManager::makeSectorkeyFromScancontext(Eigen::MatrixXd &_desc) {
+MatrixXd SCManager::makeSectorkeyFromScancontext(MatrixXd &_desc) {
     /*
      * summary: columnwise mean vector
      */
-    Eigen::MatrixXd variant_key(1, _desc.cols());
+    MatrixXd variant_key(1, _desc.cols());
     for (int col_idx = 0; col_idx < _desc.cols(); col_idx++) {
-        Eigen::MatrixXd curr_col = _desc.col(col_idx);
+        MatrixXd curr_col = _desc.col(col_idx);
         variant_key(0, col_idx) = curr_col.mean();
     }
 
     return variant_key;
 }  // SCManager::makeSectorkeyFromScancontext
 
-void SCManager::makeAndSaveScancontextAndKeys(const std::vector<Eigen::Vector3d> &_scan_down) {
-    Eigen::MatrixXd sc = makeScancontext(_scan_down);  // v1
-    Eigen::MatrixXd ringkey = makeRingkeyFromScancontext(sc);
-    Eigen::MatrixXd sectorkey = makeSectorkeyFromScancontext(sc);
+void SCManager::makeAndSaveScancontextAndKeys(const std::vector<Vector3d> &_scan_down) {
+    MatrixXd sc = makeScancontext(_scan_down);  // v1
+    MatrixXd ringkey = makeRingkeyFromScancontext(sc);
+    MatrixXd sectorkey = makeSectorkeyFromScancontext(sc);
     std::vector<float> polarcontext_invkey_vec = eig2stdvec(ringkey);
 
     polarcontexts_.push_back(sc);
@@ -200,10 +196,7 @@ void SCManager::makeAndSaveScancontextAndKeys(const std::vector<Eigen::Vector3d>
 
 }  // SCManager::makeAndSaveScancontextAndKeys
 
-std::pair<int, float> SCManager::detectLoopClosureID(void) {
-    int loop_id{
-        -1};  // init with -1, -1 means no loop (== LeGO-LOAM's variable "closestHistoryFrameID")
-
+std::tuple<int, int, float, float> SCManager::detectLoopClosureID() {
     auto curr_key = polarcontext_invkeys_mat_.back();  // current observation (query)
     auto curr_desc = polarcontexts_.back();            // current observation (query)
 
@@ -211,8 +204,7 @@ std::pair<int, float> SCManager::detectLoopClosureID(void) {
      * step 1: candidates from ringkey tree_
      */
     if (polarcontext_invkeys_mat_.size() < NUM_EXCLUDE_RECENT + 1) {
-        std::pair<int, float> result{loop_id, 0.0};
-        return result;  // Early return
+        return {-1, -1, 1.0, 0.0};  // Early return
     }
 
     // tree_ reconstruction (not mandatory to make everytime)
@@ -264,30 +256,8 @@ std::pair<int, float> SCManager::detectLoopClosureID(void) {
         }
     }
 
-    /*
-     * loop threshold check
-     */
-    if (min_dist < SC_DIST_THRES) {
-        loop_id = nn_idx;
-
-        std::cout << "[Loop found] Nearest distance: " << min_dist << " btn "
-                  << polarcontexts_.size() - 1 << " and " << nn_idx << "." << std::endl;
-        std::cout << "[Loop found] yaw diff: " << nn_align * PC_UNIT_SECTORANGLE << " deg."
-                  << std::endl;
-    } else {
-        std::cout.precision(3);
-        std::cout << "[Not loop] Nearest distance: " << min_dist << " btn "
-                  << polarcontexts_.size() - 1 << " and " << nn_idx << "." << std::endl;
-        std::cout << "[Not loop] yaw diff: " << nn_align * PC_UNIT_SECTORANGLE << " deg."
-                  << std::endl;
-    }
-
-    // To do: return also nn_align (i.e., yaw diff)
     float yaw_diff_rad = deg2rad(nn_align * PC_UNIT_SECTORANGLE);
-    std::pair<int, float> result{loop_id, yaw_diff_rad};
-
-    return result;
+    auto query_id = polarcontexts_.size() - 1;
+    return {query_id, nn_idx, min_dist, yaw_diff_rad};
 
 }  // SCManager::detectLoopClosureID
-
-// } // namespace SC2

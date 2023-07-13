@@ -1,6 +1,7 @@
 # MIT License
 #
-# Copyright (c) 2023 Saurabh Gupta, Tiziano Guadagnino, Cyrill Stachniss.
+# Copyright (c) 2023 Ignacio Vizzo, Tiziano Guadagnino, Benedikt Mersch, Cyrill
+# Stachniss.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,19 +20,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from setuptools import find_packages
-from skbuild import setup
+from tqdm.auto import trange
 
-setup(
-    packages=find_packages(),
-    cmake_install_dir="pybind/",
-    cmake_install_target="install_python_bindings",
-    entry_points={"console_scripts": ["scan_context_pipeline=python.tools.cmd:run"]},
-    install_requires=[
-        "numpy",
-        "typer[all]>=0.6.0",
-        "open3d>=0.13",
-        "tqdm",
-        "plyfile",
-    ],
-)
+
+def get_progress_bar(first_scan, last_scan):
+    return trange(first_scan, last_scan, unit=" frames", dynamic_ncols=True)

@@ -1,33 +1,24 @@
 #pragma once
 
-#include <Eigen/Dense>
-#include <cassert>
-#include <cmath>
-#include <cstdlib>
+#include <Eigen/Core>
 #include <memory>
-#include <utility>
+#include <tuple>
 #include <vector>
 
 #include "KDTreeVectorOfVectorsAdaptor.h"
 #include "nanoflann.hpp"
-
-using namespace Eigen;
-using namespace nanoflann;
 
 // using xyz only. but a user can exchange the original bin encoding function (i.e., max hegiht) to
 // max intensity (for detail, refer 20 ICRA Intensity Scan Context)
 using KeyMat = std::vector<std::vector<float>>;
 using InvKeyTree = KDTreeVectorOfVectorsAdaptor<KeyMat, float>;
 
-// namespace SC2
-// {
-
 void coreImportTest(void);
 
 // sc param-independent helper functions
 float xy2theta(const float &_x, const float &_y);
-MatrixXd circshift(MatrixXd &_mat, int _num_shift);
-std::vector<float> eig2stdvec(MatrixXd _eigmat);
+Eigen::MatrixXd circshift(Eigen::MatrixXd &_mat, int _num_shift);
+std::vector<float> eig2stdvec(Eigen::MatrixXd _eigmat);
 
 class SCManager {
 public:
@@ -38,16 +29,18 @@ public:
     Eigen::MatrixXd makeRingkeyFromScancontext(Eigen::MatrixXd &_desc);
     Eigen::MatrixXd makeSectorkeyFromScancontext(Eigen::MatrixXd &_desc);
 
-    int fastAlignUsingVkey(MatrixXd &_vkey1, MatrixXd &_vkey2);
-    double distDirectSC(MatrixXd &_sc1,
-                        MatrixXd &_sc2);  // "d" (eq 5) in the original paper (IROS 18)
+    int fastAlignUsingVkey(Eigen::MatrixXd &_vkey1, Eigen::MatrixXd &_vkey2);
+    double distDirectSC(Eigen::MatrixXd &_sc1,
+                        Eigen::MatrixXd &_sc2);  // "d" (eq 5) in the original paper (IROS 18)
     std::pair<double, int> distanceBtnScanContext(
-        MatrixXd &_sc1, MatrixXd &_sc2);  // "D" (eq 6) in the original paper (IROS 18)
+        Eigen::MatrixXd &_sc1,
+        Eigen::MatrixXd &_sc2);  // "D" (eq 6) in the original paper (IROS 18)
 
     // User-side API
     void makeAndSaveScancontextAndKeys(const std::vector<Eigen::Vector3d> &_scan_down);
-    std::pair<int, float> detectLoopClosureID(
-        void);  // int: nearest node index, float: relative yaw
+    std::tuple<int, int, float, float>
+    detectLoopClosureID();  // int: query node index, int: nearest node index, float: sc distance,
+                            // float: relative yaw
 
 public:
     // hyper parameters ()
@@ -94,5 +87,3 @@ public:
     KeyMat polarcontext_invkeys_to_search_;
     std::unique_ptr<InvKeyTree> polarcontext_tree_;
 };  // SCManager
-
-// } // namespace SC2

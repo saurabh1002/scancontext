@@ -1,6 +1,7 @@
 # MIT License
 #
-# Copyright (c) 2023 Saurabh Gupta, Tiziano Guadagnino, Cyrill Stachniss.
+# Copyright (c) 2022 Ignacio Vizzo, Tiziano Guadagnino, Benedikt Mersch, Cyrill
+# Stachniss.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,26 +20,34 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-from typing import Tuple
+import glob
+import os
+from pathlib import Path
 
 import numpy as np
 
-from . import scan_context_pybind
 
+class MulranDataset:
+    def __init__(self, data_dir: Path, *_, **__):
+        self.sequence_id = os.path.basename(data_dir)
+        self.sequence_dir = os.path.realpath(data_dir)
+        self.velodyne_dir = os.path.join(self.sequence_dir, "Ouster/")
 
-class ScanContext:
-    def __init__(self) -> None:
-        self._pipeline = scan_context_pybind._SCManager()
+        self.scan_files = sorted(glob.glob(self.velodyne_dir + "*.bin"))
 
-    def process_new_scan(self, scan: np.ndarray) -> None:
-        scan = scan_context_pybind._VectorEigen3d(scan)
-        self._pipeline._makeAndSaveScancontextAndKeys(scan)
+        self.gt_closure_indices = np.loadtxt(
+            os.path.join(self.sequence_dir, "loop_closure", "gt_closures.txt")
+        )
+        self.gt_closure_overlap_scores = np.loadtxt(
+            os.path.join(self.sequence_dir, "loop_closure", "gt_overlaps.txt")
+        )
 
-    def check_for_closure(self) -> Tuple[int, float]:
-        query_node_idx, nearest_node_idx, distance, init_yaw = self._pipeline._detectLoopClosureID()
-        return query_node_idx, nearest_node_idx, distance, init_yaw
+    def __len__(self):
+        return len(self.scan_files)
 
-    def get_scan_context(self, idx: int) -> np.ndarray:
-        scan_context = self._pipeline._getScanContext(idx)
-        return np.asarray(scan_context)
+    def __getitem__(self, idx):
+        return self.read_point_cloud(self.scan_files[idx])
+
+    def read_point_cloud(self, file_path: str):
+        points = np.fromfile(file_path, dtype=np.float32).reshape((-1, 4))[:, :3]
+        return points.astype(np.float64)
