@@ -35,18 +35,18 @@ class NewerCollegeDataset:
         except ModuleNotFoundError:
             print(f'Newer College requires pnytccloud: "pip install pyntcloud"')
 
-        self.data_source = os.path.join(data_dir, "")
-        self.scan_folder = os.path.join(self.data_source, "raw_format/ouster_scan")
-        self.pose_file = os.path.join(self.data_source, "ground_truth/registered_poses.csv")
+        self.data_dir = os.path.join(data_dir, "")
+        self.scan_folder = os.path.join(self.data_dir, "raw_format/ouster_scan")
+        self.pose_file = os.path.join(self.data_dir, "ground_truth/registered_poses.csv")
         self.sequence_id = os.path.basename(data_dir)
 
         # Load scan files and poses
         self.scan_files = self.get_pcd_filenames(self.scan_folder)
         self.gt_closure_indices = np.loadtxt(
-            os.path.join(self.data_source, "loop_closure", "gt_closures.txt")
+            os.path.join(self.data_dir, "loop_closure", "gt_closures.txt")
         )
         self.gt_closure_overlap_scores = np.loadtxt(
-            os.path.join(self.data_source, "loop_closure", "gt_overlaps.txt")
+            os.path.join(self.data_dir, "loop_closure", "gt_overlaps.txt")
         )
 
     def __len__(self):

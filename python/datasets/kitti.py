@@ -29,15 +29,15 @@ import numpy as np
 class KITTIOdometryDataset:
     def __init__(self, data_dir, sequence: int, *_, **__):
         self.sequence_id = str(int(sequence)).zfill(2)
-        self.kitti_sequence_dir = os.path.join(data_dir, "sequences", self.sequence_id)
-        self.velodyne_dir = os.path.join(self.kitti_sequence_dir, "velodyne/")
+        self.data_dir = os.path.join(data_dir, "sequences", self.sequence_id)
+        self.velodyne_dir = os.path.join(self.data_dir, "velodyne/")
 
         self.scan_files = sorted(glob.glob(self.velodyne_dir + "*.bin"))
         self.gt_closure_indices = np.loadtxt(
-            os.path.join(self.kitti_sequence_dir, "loop_closure", "gt_closures.txt")
+            os.path.join(self.data_dir, "loop_closure", "gt_closures.txt")
         )
         self.gt_closure_overlap_scores = np.loadtxt(
-            os.path.join(self.kitti_sequence_dir, "loop_closure", "gt_overlaps.txt")
+            os.path.join(self.data_dir, "loop_closure", "gt_overlaps.txt")
         )
 
     def __getitem__(self, idx):
