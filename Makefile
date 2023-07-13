@@ -10,5 +10,5 @@ uninstall:
 	@pip -v uninstall scan-context
 
 cpp:
-	@cmake -Bbuild scan_context/
+	@cmake -Bbuild .
 	@cmake --build build -j$(nproc --all)
