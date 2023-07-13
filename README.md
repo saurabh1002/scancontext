@@ -1,40 +1,9 @@
 <!-- md preview: Show the rendered HTML markdown to the right of the current editor using ctrl-shift-m.-->
 
+# Working C++ code and Python Bindings to the original ScanContext [repository](https://github.com/irapkaist/scancontext) where only matlab scripts work
+
+---------------------------------
 # Scan Context
-
-## NEWS (Oct, 2021): Scan Context++ is accepted for T-RO!
-- Our extended study named Scan Context++ is accepted for T-RO. 
-  - Scan Context++: Structural Place Recognition Robust to Rotation and Lateral Variations in Urban Environments
-    - [Paper](https://arxiv.org/pdf/2109.13494.pdf), [Summary](https://threadreaderapp.com/thread/1443044133937942533.html), [Video](https://youtu.be/ZWEqwYKQIeg)
-- The additional evaluation codes (e.g., lateral evaluations on Oxford Radar RobotCar dataset) with the new metric (we call it recall-distribution based on KL-D) will be added soon. 
-
-## Note
-- Scan Context can be easily integrated with any LiDAR odometry algorithms or any LiDAR sensors. Examples are:
-  - Integrated with A-LOAM: [SC-A-LOAM](https://github.com/gisbi-kim/SC-A-LOAM)
-  - Integrated with LeGO-LOAM: [SC-LeGO-LOAM](https://github.com/irapkaist/SC-LeGO-LOAM)
-  - Integrated with LIO-SAM: [SC-LIO-SAM](https://github.com/gisbi-kim/SC-LIO-SAM)
-  - Integrated with FAST-LIO2: [FAST_LIO_SLAM](https://github.com/gisbi-kim/FAST_LIO_SLAM)
-  - Integrated with a basic ICP odometry: [PyICP-SLAM](https://github.com/gisbi-kim/PyICP-SLAM)
-    - This implementation is fully python-based so slow but educational purpose.   
-    - If you find a fast python API for Scan Context, use [https://github.com/gisbi-kim/scancontext-pybind](https://github.com/gisbi-kim/scancontext-pybind)
-- Scan Context also works for radar.
-  - Integrated with yeti-radar-odometry for radar SLAM: [navtech-radar-slam](https://github.com/gisbi-kim/navtech-radar-slam)
-    - p.s. please see the ``fast_evaluator_radar`` directory for the radar place recognition evaluation (radar scan context was introduced in [MulRan dataset](https://sites.google.com/view/mulran-pr/home) paper).
-
-## NEWS (April, 2020): C++ implementation
-- C++ implementation released!
-  - See the directory `cpp/module/Scancontext`
-  - Features 
-    - Light-weight: a single header and cpp file named "Scancontext.h" and "Scancontext.cpp"
-      - Our module has KDtree and we used <a href="https://github.com/jlblancoc/nanoflann"> nanoflann</a>. nanoflann is an also single-header-program and that file is in our directory.
-    - Easy to use: A user just remembers and uses only two API functions; `makeAndSaveScancontextAndKeys` and `detectLoopClosureID`.
-    - Fast: tested the loop detector runs at 10-15Hz (for 20 x 60 size, 10 candidates)
-  - Example: Real-time LiDAR SLAM
-    - We integrated the C++ implementation within the recent popular LiDAR odometry codes (e.g., <a href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM"> LeGO-LOAM </a> and <a href="https://github.com/HKUST-Aerial-Robotics/A-LOAM">A-LOAM</a>).
-      - That is, LiDAR SLAM = LiDAR Odometry (LeGO-LOAM) + Loop detection (Scan Context) and closure (GTSAM)
-    - For details, see `cpp/example/lidar_slam` or refer these repositories: <a href="https://github.com/irapkaist/SC-LeGO-LOAM">SC-LeGO-LOAM</a> or <a href="https://github.com/gisbi-kim/SC-A-LOAM">SC-A-LOAM</a>.
----
-
 
 - Scan Context is a global descriptor for LiDAR point cloud, which is proposed in this paper and details are easily summarized in this <a href="https://www.youtube.com/watch?v=_etNafgQXoY"> video </a>.
 
@@ -108,5 +77,5 @@ If you have any questions, contact here please
 ## License
  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 
-### Copyright 
+### Copyright
 - All codes on this page are copyrighted by KAIST and Naver Labs and published under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 License. You must attribute the work in the manner specified by the author. You may not use the work for commercial purposes, and you may only distribute the resulting work under the same license if you alter, transform, or create the work.

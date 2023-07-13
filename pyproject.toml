@@ -1,0 +1,21 @@
+[build-system]
+requires = [
+    "scikit-build>=0.17.4",
+    "ninja",
+    "cmake",
+    "setuptools<66.0.0", # https://github.com/pypa/setuptools/issues/3772
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scan_context"
+version = "0.0.1"
+
+[tool.black]
+line-length = 100
+
+[tool.isort]
+profile = "black"
+
+[tool.pylint.format]
+max-line-length = "100"
