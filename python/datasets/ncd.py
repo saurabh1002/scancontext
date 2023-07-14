@@ -42,12 +42,12 @@ class NewerCollegeDataset:
 
         # Load scan files and poses
         self.scan_files = self.get_pcd_filenames(self.scan_folder)
-        self.gt_closure_indices = np.loadtxt(
-            os.path.join(self.data_dir, "loop_closure", "gt_closures.txt")
-        )
-        self.gt_closure_overlap_scores = np.loadtxt(
-            os.path.join(self.data_dir, "loop_closure", "gt_overlaps.txt")
-        )
+        try:
+            self.gt_closure_indices = np.loadtxt(
+                os.path.join(self.data_dir, "loop_closure", "gt_closures.txt")
+            )
+        except FileNotFoundError:
+            self.gt_closure_indices = None
 
     def __len__(self):
         return len(self.scan_files)

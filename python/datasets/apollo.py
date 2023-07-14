@@ -44,12 +44,12 @@ class ApolloDataset:
 
         self.scan_files = natsort.natsorted(glob.glob(f"{data_dir}/pcds/*.pcd"))
         self.sequence_id = os.path.basename(data_dir)
-        self.gt_closure_indices = np.loadtxt(
-            os.path.join(self.data_dir, "loop_closure", "gt_closures.txt")
-        )
-        self.gt_closure_overlap_scores = np.loadtxt(
-            os.path.join(self.data_dir, "loop_closure", "gt_overlaps.txt")
-        )
+        try:
+            self.gt_closure_indices = np.loadtxt(
+                os.path.join(self.data_dir, "loop_closure", "gt_closures.txt")
+            )
+        except FileNotFoundError:
+            self.gt_closure_indices = None
 
     def __len__(self):
         return len(self.scan_files)

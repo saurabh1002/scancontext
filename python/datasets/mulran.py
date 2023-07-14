@@ -35,12 +35,12 @@ class MulranDataset:
 
         self.scan_files = sorted(glob.glob(self.velodyne_dir + "*.bin"))
 
-        self.gt_closure_indices = np.loadtxt(
-            os.path.join(self.data_dir, "loop_closure", "gt_closures.txt")
-        )
-        self.gt_closure_overlap_scores = np.loadtxt(
-            os.path.join(self.data_dir, "loop_closure", "gt_overlaps.txt")
-        )
+        try:
+            self.gt_closure_indices = np.loadtxt(
+                os.path.join(self.data_dir, "loop_closure", "gt_closures.txt")
+            )
+        except FileNotFoundError:
+            self.gt_closure_indices = None
 
     def __len__(self):
         return len(self.scan_files)

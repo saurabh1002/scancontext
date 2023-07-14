@@ -54,7 +54,8 @@ class PipelineResults:
         self.gt_closures: Set[Tuple[int]] = set(map(lambda x: tuple(sorted(x)), gt_closures))
 
     def print(self) -> None:
-        self.log_to_console()
+        if self.metrics:
+            self.log_to_console()
 
     def append(self, query_idx: int, nn_idx: int, dist: float) -> None:
         indices = np.where(dist < self._scan_context_thresholds)[0]

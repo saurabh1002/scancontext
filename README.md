@@ -2,6 +2,16 @@
 
 # Working C++ code and Python Bindings to the original ScanContext [repository](https://github.com/irapkaist/scancontext) where only matlab scripts work
 
+## How to install
+1. Clone this repository to a local directory
+2. run `make install` from within a terminal at the root of this directory
+
+## Usage
+1. Run `scan_context_pipeline --help` to know how to use the pipeline
+2. You could select an existing dataloader for common datasets like KITTI, Mulran, Apollo or Newer College, or write a new one for any other dataset following the same pattern as in the provided dataloaders
+3. The pipeline will save the computed loop closure indices to a file in the dataset root path within the `results` folder
+4. If provided with a ground truth closure file, the pipeline will additionally generate a Precision-Recall Table (See the dataloaders for how to provide the ground truth closures)
+
 ---------------------------------
 # Scan Context
 
@@ -39,40 +49,9 @@ recognition and long-term localization.
 <p align="center"><img src="example/basic/various_res.png" width=300></p>
 
 
-## How to use?: example cases
-- The structure of this repository is composed of 3 example use cases.
-- Most of the codes are written in Matlab.
-- A directory _matlab_ contains main functions including Scan Context generation and the distance function.
-- A directory _example_ contains a full example code for a few applications. We provide a total 3 examples.
- 1. _**basics**_ contains a literally basic codes such as generation and can be a start point to understand Scan Context.
-
- 2. _**place recognition**_ is an example directory for our IROS18 paper. The example is conducted using KITTI sequence 00 and PlaceRecognizer.m is the main code. You can easily grasp the full pipeline of Scan Context-based place recognition via watching and following the PlaceRecognizer.m code. Our Scan Context-based place recognition system consists of two steps; description and search. The search step is then composed of two hierarchical stages (1. ring key-based KD tree for fast candidate proposal, 2. candidate to query pairwise comparison-based nearest search). We note that our coarse yaw aligning-based pairwise distance enables reverse-revisit detection well, unlike others. The pipeline is below.
-<p align="center"><img src="example/place_recognition/sc_pipeline.png" width=600></p>
-
- 3. _**long-term localization**_ is an example directory for our RAL19 paper. For the separation of mapping and localization, there are separated train and test steps. The main training and test codes are written in python and Keras, only excluding data generation and performance evaluation codes (they are written in Matlab), and those python codes are provided using jupyter notebook. We note that some path may not directly work for your environment but the evaluation codes (e.g., makeDataForPRcurveForSCIresult.m) will help you understand how this classification-based SCI-localization system works. The figure below depicts our long-term localization pipeline. <p align="center"><img src="example/longterm_localization/sci_pipeline.png" width=600></p> More details of our long-term localization pipeline is found in the below paper and we also recommend you to watch this <a href="https://www.youtube.com/watch?v=apmmduXTnaE"> video </a>.
-```
-@ARTICLE{ gkim-2019-ral,
-    author = {G. {Kim} and B. {Park} and A. {Kim}},
-    journal = {IEEE Robotics and Automation Letters},
-    title = {1-Day Learning, 1-Year Localization: Long-Term LiDAR Localization Using Scan Context Image},
-    year = {2019},
-    volume = {4},
-    number = {2},
-    pages = {1948-1955},
-    month = {April}
-}
-```
-
-  4. _**SLAM**_ directory contains the practical use case of Scan Context for SLAM pipeline. The details are maintained in the related other repository _[PyICP SLAM](https://github.com/kissb2/PyICP-SLAM)_; the full-python LiDAR SLAM codes using Scan Context as a loop detector.
-
 ## Acknowledgment
 This work is supported by the Korea Agency for Infrastructure Technology Advancement (KAIA) grant funded by the Ministry of Land, Infrastructure and Transport of Korea (19CTAP-C142170-02), and [High-Definition Map Based Precise Vehicle Localization Using Cameras and LIDARs] project funded by NAVER LABS Corporation.
 
-## Contact
-If you have any questions, contact here please
- ```
- paulgkim@kaist.ac.kr
- ```
 
 ## License
  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.

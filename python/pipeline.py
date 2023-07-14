@@ -58,7 +58,8 @@ class ScanContextPipeline:
 
     def run(self):
         self._run_pipeline()
-        self._run_evaluation()
+        if self.gt_closure_indices is not None:
+            self._run_evaluation()
         self._log_to_file()
 
         return self.results
@@ -85,7 +86,8 @@ class ScanContextPipeline:
 
     def _log_to_file(self) -> None:
         self.results_dir = self._create_results_dir()
-        self.results.log_to_file_pr(os.path.join(self.results_dir, "metrics.txt"))
+        if self.gt_closure_indices is not None:
+            self.results.log_to_file_pr(os.path.join(self.results_dir, "metrics.txt"))
         self.results.log_to_file_closures(self.results_dir)
 
     def _create_results_dir(self) -> Path:
