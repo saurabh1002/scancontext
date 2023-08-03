@@ -39,6 +39,12 @@ class MulranDataset:
             self.gt_closure_indices = np.loadtxt(
                 os.path.join(self.data_dir, "loop_closure", "gt_closures.txt")
             )
+            self.gt_closure_overlap_scores = np.loadtxt(
+                os.path.join(self.data_dir, "loop_closure", "gt_overlaps.txt")
+            )
+            self.gt_closure_indices = self.gt_closure_indices[
+                np.where(self.gt_closure_overlap_scores > 0.25)[0]
+            ]
         except FileNotFoundError:
             self.gt_closure_indices = None
 
