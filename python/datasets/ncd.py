@@ -29,7 +29,7 @@ import numpy as np
 
 
 class NewerCollegeDataset:
-    def __init__(self, data_dir: Path, *_, **__):
+    def __init__(self, data_dir: Path, overlap_threshold: float, *_, **__):
         try:
             self.PyntCloud = importlib.import_module("pyntcloud").PyntCloud
         except ModuleNotFoundError:
@@ -50,7 +50,7 @@ class NewerCollegeDataset:
                 os.path.join(self.data_dir, "loop_closure", "gt_overlaps.txt")
             )
             self.gt_closure_indices = self.gt_closure_indices[
-                np.where(self.gt_closure_overlap_scores > 0.25)[0]
+                np.where(self.gt_closure_overlap_scores > overlap_threshold)[0]
             ]
         except FileNotFoundError:
             self.gt_closure_indices = None
