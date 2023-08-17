@@ -85,13 +85,13 @@ class PipelineResults:
         table.add_column("F1 score", justify="left", style="green")
         for [threshold, metric] in self.metrics.items():
             table.add_row(
-                f"{threshold}",
+                f"{threshold:.4f}",
                 f"{metric.tp}",
                 f"{metric.fp}",
                 f"{metric.fn}",
-                f"{metric.precision}",
-                f"{metric.recall}",
-                f"{metric.F1}",
+                f"{metric.precision:.4f}",
+                f"{metric.recall:.4f}",
+                f"{metric.F1:.4f}",
             )
         return table
 
