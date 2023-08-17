@@ -37,6 +37,7 @@ class ScanContextPipeline:
     def __init__(
         self,
         dataset,
+        results_dir: Path,
         visualize: Optional[bool] = False,
     ):
         self._dataset = dataset
@@ -44,10 +45,10 @@ class ScanContextPipeline:
         self._last = len(self._dataset)
 
         self._visualize = visualize
-        self.results_dir = None
+        self.results_dir = results_dir
 
         self.scan_context = ScanContext()
-        self.dataset_name = self._dataset.__class__.__name__
+        self.dataset_name = self._dataset.sequence_id
 
         self.gt_closure_indices = self._dataset.gt_closure_indices
 
@@ -94,8 +95,12 @@ class ScanContextPipeline:
         def get_timestamp() -> str:
             return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-        results_dir = os.path.join(self._dataset.data_dir, "scan_context_results", get_timestamp())
-        latest_dir = os.path.join(self._dataset.data_dir, "scan_context_results", "latest")
+        results_dir = os.path.join(
+            self.results_dir, "scan_context_results", self.dataset_name, get_timestamp()
+        )
+        latest_dir = os.path.join(
+            self.results_dir, "scan_context_results", self.dataset_name, "latest"
+        )
         os.makedirs(results_dir, exist_ok=True)
         os.unlink(latest_dir) if os.path.exists(latest_dir) or os.path.islink(latest_dir) else None
         os.symlink(results_dir, latest_dir)

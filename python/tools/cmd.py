@@ -49,7 +49,7 @@ docstring = f"""
 \b
 [bold green]Examples: [/bold green]
 # Use a specific dataloader: {", ".join(_available_dl_help)}
-$ scan_context_pipeline --dataloader kitti --sequence 07 --visualize <path-to-kitti-root>:open_file_folder:
+$ scan_context_pipeline --dataloader mulran --gt-overlap-threshold 0.5 <path-to-kitti-root>:open_file_folder:
 """
 
 
@@ -59,6 +59,12 @@ def scan_context_pipeline(
         ...,
         help="The data directory used by the specified dataloader",
         show_default=False,
+    ),
+    results_dir: Path = typer.Argument(
+        ...,
+        help="The path where results are to be stored",
+        show_default=False,
+        exists=False,
     ),
     dataloader: str = typer.Option(
         None,
@@ -90,11 +96,6 @@ def scan_context_pipeline(
         rich_help_panel="Additional Options",
     ),
 ):
-    # Validate some options
-    if dataloader in sequence_dataloaders() and sequence is None:
-        print('You must specify a sequence "--sequence"')
-        raise typer.Exit(code=1)
-
     # Lazy-loading for faster CLI
     from python.datasets import dataset_factory
     from python.pipeline import ScanContextPipeline
@@ -107,6 +108,7 @@ def scan_context_pipeline(
             # Additional options
             sequence=sequence,
         ),
+        results_dir=results_dir,
         visualize=visualize,
     ).run().print()
 

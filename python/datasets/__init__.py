@@ -28,11 +28,6 @@ def supported_file_extensions():
     return ["ply", "bin", "pcd"]
 
 
-def sequence_dataloaders():
-    # TODO: automatically infer this
-    return ["kitti", "mulran", "nclt", "ncd", "apollo"]
-
-
 def available_dataloaders() -> List:
     import os.path
     import pkgutil
