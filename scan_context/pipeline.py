@@ -28,9 +28,9 @@ from typing import Optional
 import numpy as np
 
 from pybind.scan_context import ScanContext
-from python.tools.pipeline_results import PipelineResults
-from python.tools.progress_bar import get_progress_bar
-from python.tools.visualization import draw_scan_context
+from scan_context.tools.pipeline_results import PipelineResults
+from scan_context.tools.progress_bar import get_progress_bar
+from scan_context.tools.visualization import draw_scan_context
 
 
 class ScanContextPipeline:

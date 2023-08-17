@@ -26,7 +26,7 @@ setup(
     packages=find_packages(),
     cmake_install_dir="pybind/",
     cmake_install_target="install_python_bindings",
-    entry_points={"console_scripts": ["scan_context_pipeline=python.tools.cmd:run"]},
+    entry_points={"console_scripts": ["scan_context_pipeline=scan_context.tools.cmd:run"]},
     install_requires=[
         "numpy",
         "typer[all]>=0.6.0",

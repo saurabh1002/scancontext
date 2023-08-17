@@ -27,7 +27,7 @@ from typing import Optional
 
 import typer
 
-from python.datasets import available_dataloaders
+from scan_context.datasets import available_dataloaders
 
 
 def name_callback(value: str):
@@ -97,8 +97,8 @@ def scan_context_pipeline(
     ),
 ):
     # Lazy-loading for faster CLI
-    from python.datasets import dataset_factory
-    from python.pipeline import ScanContextPipeline
+    from scan_context.datasets import dataset_factory
+    from scan_context.pipeline import ScanContextPipeline
 
     ScanContextPipeline(
         dataset=dataset_factory(

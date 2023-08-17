@@ -29,5 +29,5 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(USE_SYSTEM_EIGEN "Use Eigen3 from the system" OFF)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/scan_context)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cpp)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/pybind)
