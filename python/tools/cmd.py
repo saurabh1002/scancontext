@@ -27,7 +27,7 @@ from typing import Optional
 
 import typer
 
-from python.datasets import available_dataloaders, sequence_dataloaders
+from python.datasets import available_dataloaders
 
 
 def name_callback(value: str):
