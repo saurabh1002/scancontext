@@ -34,9 +34,20 @@ class Metrics:
         self.fp = false_positives
         self.fn = false_negatives
 
-        self.precision = self.tp / (self.tp + self.fp)
-        self.recall = self.tp / (self.tp + self.fn)
-        self.F1 = 2 * self.precision * self.recall / (self.precision + self.recall)
+        try:
+            self.precision = self.tp / (self.tp + self.fp)
+        except ZeroDivisionError:
+            self.precision = np.nan
+
+        try:
+            self.recall = self.tp / (self.tp + self.fn)
+        except ZeroDivisionError:
+            self.recall = np.nan
+
+        try:
+            self.F1 = 2 * self.precision * self.recall / (self.precision + self.recall)
+        except ZeroDivisionError:
+            self.F1 = np.nan
 
 
 class PipelineResults:
