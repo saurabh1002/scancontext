@@ -28,6 +28,7 @@
 
 #include <Eigen/Core>
 #include <memory>
+#include <tuple>
 #include <vector>
 
 #include "ScanContext.hpp"
@@ -54,7 +55,12 @@ PYBIND11_MODULE(scan_context_pybind, m) {
     scan_context.def(py::init<>())
         .def("_makeAndSaveScancontextAndKeys", &SCManager::makeAndSaveScancontextAndKeys,
              "_scan_down"_a)
-        .def("_detectLoopClosureID", &SCManager::detectLoopClosureID)
+        .def("_detectLoopClosureID",
+             [](SCManager &self) {
+                 auto res = self.detectLoopClosureID();
+                 return std::make_tuple(std::get<0>(res), py::cast(std::get<1>(res)),
+                                        py::cast(std::get<2>(res)));
+             })
         .def(
             "_getScanContext",
             [](const SCManager &self, int idx) { return self.polarcontexts_[idx]; }, "idx"_a);

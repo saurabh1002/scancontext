@@ -71,16 +71,18 @@ class ScanContextPipeline:
         for query_idx in get_progress_bar(self._first + 1, self._last):
             scan = self._dataset[query_idx]
             self.scan_context.process_new_scan(scan)
-            query_idx, nearest_node_idx, dist, init_yaw = self.scan_context.check_for_closure()
+            query_idx, candidate_ids, candidate_dists = self.scan_context.check_for_closure()
             if self._visualize:
-                draw_scan_context(
-                    [
-                        self.scan_context.get_scan_context(query_idx),
-                        self.scan_context.get_scan_context(nearest_node_idx),
-                    ]
-                )
-            if query_idx != -1 and nearest_node_idx != -1:
-                self.results.append(query_idx, nearest_node_idx, dist)
+                for candidate_id in candidate_ids:
+                    draw_scan_context(
+                        [
+                            self.scan_context.get_scan_context(query_idx),
+                            self.scan_context.get_scan_context(candidate_id),
+                        ]
+                    )
+            if query_idx != -1:
+                for candidate_id, dist in zip(candidate_ids, candidate_dists):
+                    self.results.append(query_idx, candidate_id, dist)
 
     def _run_evaluation(self) -> None:
         self.results.compute_metrics()

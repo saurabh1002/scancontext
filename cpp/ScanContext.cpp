@@ -21,9 +21,11 @@ float xy2theta(const float &_x, const float &_y) {
 
     if (_x < 0 & _y >= 0) return 180 - ((180 / M_PI) * atan(_y / (-_x)));
 
-    if (_x < 0 & _y < 0) return 180 + ((180 / M_PI) * atan(_y / _x));
+    if (_x < 0 & _y < 0)
+        return 180 + ((180 / M_PI) * atan(_y / _x));
 
-    if (_x >= 0 & _y < 0) return 360 - ((180 / M_PI) * atan((-_y) / _x));
+    else
+        return 360 - ((180 / M_PI) * atan((-_y) / _x));
 }  // xy2theta
 
 MatrixXd circshift(MatrixXd &_mat, int _num_shift) {
@@ -196,15 +198,19 @@ void SCManager::makeAndSaveScancontextAndKeys(const std::vector<Vector3d> &_scan
 
 }  // SCManager::makeAndSaveScancontextAndKeys
 
-std::tuple<int, int, float, float> SCManager::detectLoopClosureID() {
+std::tuple<int, std::vector<size_t>, std::vector<double>> SCManager::detectLoopClosureID() {
     auto curr_key = polarcontext_invkeys_mat_.back();  // current observation (query)
     auto curr_desc = polarcontexts_.back();            // current observation (query)
 
+    // knn search
+    std::vector<size_t> candidate_indexes(NUM_CANDIDATES_FROM_TREE);
+    std::vector<float> out_dists_sqr(NUM_CANDIDATES_FROM_TREE);
+    std::vector<double> candidate_dists(NUM_CANDIDATES_FROM_TREE);
     /*
      * step 1: candidates from ringkey tree_
      */
     if (polarcontext_invkeys_mat_.size() < NUM_EXCLUDE_RECENT + 1) {
-        return {-1, -1, 1.0, 0.0};  // Early return
+        return {-1, candidate_indexes, candidate_dists};  // Early return
     }
 
     // tree_ reconstruction (not mandatory to make everytime)
@@ -227,10 +233,6 @@ std::tuple<int, int, float, float> SCManager::detectLoopClosureID() {
     int nn_align = 0;
     int nn_idx = 0;
 
-    // knn search
-    std::vector<size_t> candidate_indexes(NUM_CANDIDATES_FROM_TREE);
-    std::vector<float> out_dists_sqr(NUM_CANDIDATES_FROM_TREE);
-
     nanoflann::KNNResultSet<float> knnsearch_result(NUM_CANDIDATES_FROM_TREE);
     knnsearch_result.init(&candidate_indexes[0], &out_dists_sqr[0]);
     polarcontext_tree_->index->findNeighbors(knnsearch_result, &curr_key[0] /* query */,
@@ -245,19 +247,9 @@ std::tuple<int, int, float, float> SCManager::detectLoopClosureID() {
         std::pair<double, int> sc_dist_result =
             distanceBtnScanContext(curr_desc, polarcontext_candidate);
 
-        double candidate_dist = sc_dist_result.first;
-        int candidate_align = sc_dist_result.second;
-
-        if (candidate_dist < min_dist) {
-            min_dist = candidate_dist;
-            nn_align = candidate_align;
-
-            nn_idx = candidate_indexes[candidate_iter_idx];
-        }
+        candidate_dists[candidate_iter_idx] = sc_dist_result.first;
     }
-
-    float yaw_diff_rad = deg2rad(nn_align * PC_UNIT_SECTORANGLE);
     auto query_id = polarcontexts_.size() - 1;
-    return {query_id, nn_idx, min_dist, yaw_diff_rad};
+    return {query_id, candidate_indexes, candidate_dists};
 
 }  // SCManager::detectLoopClosureID

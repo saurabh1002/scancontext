@@ -38,7 +38,7 @@ public:
 
     // User-side API
     void makeAndSaveScancontextAndKeys(const std::vector<Eigen::Vector3d> &_scan_down);
-    std::tuple<int, int, float, float>
+    std::tuple<int, std::vector<size_t>, std::vector<double>>
     detectLoopClosureID();  // int: query node index, int: nearest node index, float: sc distance,
                             // float: relative yaw
 
