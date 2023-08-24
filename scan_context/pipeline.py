@@ -52,7 +52,7 @@ class ScanContextPipeline:
 
         self.gt_closure_indices = self._dataset.gt_closure_indices
 
-        scan_context_thresholds = np.arange(0.1, 0.4, 0.05)
+        scan_context_thresholds = np.arange(0.1, 1.0, 0.1)
         self.results = PipelineResults(
             self.gt_closure_indices, self.dataset_name, scan_context_thresholds
         )
