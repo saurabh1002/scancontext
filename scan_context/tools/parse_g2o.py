@@ -137,8 +137,8 @@ def main(data_dir: str = typer.Argument(""), gt_poses_file: str = typer.Argument
                 continue
             scan_i = int(ids[0])
             scan_j = int(ids[1])
-            source = dataset[scan_i]
-            target = dataset[scan_j]
+            source = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(dataset[scan_i]))
+            target = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(dataset[scan_j]))
             success = False
             estimate = gicp(source, target, pose, 1.0)
             if estimate.fitness > 0.5:
