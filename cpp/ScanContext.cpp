@@ -198,7 +198,7 @@ void SCManager::makeAndSaveScancontextAndKeys(const std::vector<Vector3d> &_scan
 
 }  // SCManager::makeAndSaveScancontextAndKeys
 
-std::tuple<int, std::vector<size_t>, std::vector<double>> SCManager::detectLoopClosureID() {
+std::tuple<int, std::vector<size_t>, std::vector<double>, std::vector<double>> SCManager::detectLoopClosureID() {
     auto curr_key = polarcontext_invkeys_mat_.back();  // current observation (query)
     auto curr_desc = polarcontexts_.back();            // current observation (query)
 
@@ -206,11 +206,12 @@ std::tuple<int, std::vector<size_t>, std::vector<double>> SCManager::detectLoopC
     std::vector<size_t> candidate_indexes(NUM_CANDIDATES_FROM_TREE);
     std::vector<float> out_dists_sqr(NUM_CANDIDATES_FROM_TREE);
     std::vector<double> candidate_dists(NUM_CANDIDATES_FROM_TREE);
+    std::vector<double> candidate_yaws(NUM_CANDIDATES_FROM_TREE);
     /*
      * step 1: candidates from ringkey tree_
      */
     if (polarcontext_invkeys_mat_.size() < NUM_EXCLUDE_RECENT + 1) {
-        return {-1, candidate_indexes, candidate_dists};  // Early return
+        return {-1, candidate_indexes, candidate_dists, candidate_yaws};  // Early return
     }
 
     // tree_ reconstruction (not mandatory to make everytime)
@@ -248,8 +249,9 @@ std::tuple<int, std::vector<size_t>, std::vector<double>> SCManager::detectLoopC
             distanceBtnScanContext(curr_desc, polarcontext_candidate);
 
         candidate_dists[candidate_iter_idx] = sc_dist_result.first;
+        candidate_yaws[candidate_iter_idx] = deg2rad(sc_dist_result.second * PC_UNIT_SECTORANGLE);
     }
     auto query_id = polarcontexts_.size() - 1;
-    return {query_id, candidate_indexes, candidate_dists};
+    return {query_id, candidate_indexes, candidate_dists, candidate_yaws};
 
 }  // SCManager::detectLoopClosureID

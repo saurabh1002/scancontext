@@ -50,6 +50,7 @@ class ScanContextPipeline:
         self.scan_context = ScanContext()
         self.dataset_name = self._dataset.sequence_id
 
+        self.closures = []
         self.gt_closure_indices = self._dataset.gt_closure_indices
 
         scan_context_thresholds = np.arange(0.1, 1.0, 0.05)
@@ -71,7 +72,7 @@ class ScanContextPipeline:
         for query_idx in get_progress_bar(self._first + 1, self._last):
             scan = self._dataset[query_idx]
             self.scan_context.process_new_scan(scan)
-            query_idx, candidate_ids, candidate_dists = self.scan_context.check_for_closure()
+            query_idx, candidate_ids, candidate_dists, candidate_yaws = self.scan_context.check_for_closure()
             if self._visualize:
                 for candidate_id in candidate_ids:
                     draw_scan_context(
@@ -81,7 +82,10 @@ class ScanContextPipeline:
                         ]
                     )
             if query_idx != -1:
-                for candidate_id, dist in zip(candidate_ids, candidate_dists):
+                for candidate_id, dist, yaw in zip(candidate_ids, candidate_dists, candidate_yaws):
+                    if dist < 0.4:
+                        relative_tf = np.array([[np.cos(yaw), -np.sin(yaw), 0, 0], [np.sin(yaw), np.cos(yaw), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+                        self.closures.append(np.r_[candidate_id, query_idx, relative_tf.flatten()])
                     self.results.append(query_idx, candidate_id, dist)
 
     def _run_evaluation(self) -> None:
@@ -92,6 +96,7 @@ class ScanContextPipeline:
         if self.gt_closure_indices is not None:
             self.results.log_to_file_pr(os.path.join(self.results_dir, "metrics.txt"))
         self.results.log_to_file_closures(self.results_dir)
+        np.savetxt(os.path.join(self.results_dir, "closures.txt"), np.asarray(self.closures))
 
     def _create_results_dir(self) -> Path:
         def get_timestamp() -> str:

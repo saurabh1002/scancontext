@@ -35,9 +35,9 @@ class ScanContext:
         scan = scan_context_pybind._VectorEigen3d(scan)
         self._pipeline._makeAndSaveScancontextAndKeys(scan)
 
-    def check_for_closure(self) -> Tuple[int, np.ndarray, np.ndarray]:
-        query_node_idx, candidate_ids, candidate_dists = self._pipeline._detectLoopClosureID()
-        return query_node_idx, np.asarray(candidate_ids, int), np.asarray(candidate_dists)
+    def check_for_closure(self) -> Tuple[int, np.ndarray, np.ndarray, np.ndarray]:
+        query_node_idx, candidate_ids, candidate_dists, candidate_yaws = self._pipeline._detectLoopClosureID()
+        return query_node_idx, np.asarray(candidate_ids, int), np.asarray(candidate_dists), np.asarray(candidate_yaws)
 
     def get_scan_context(self, idx: int) -> np.ndarray:
         scan_context = self._pipeline._getScanContext(idx)

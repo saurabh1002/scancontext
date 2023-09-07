@@ -59,7 +59,7 @@ PYBIND11_MODULE(scan_context_pybind, m) {
              [](SCManager &self) {
                  auto res = self.detectLoopClosureID();
                  return std::make_tuple(std::get<0>(res), py::cast(std::get<1>(res)),
-                                        py::cast(std::get<2>(res)));
+                                        py::cast(std::get<2>(res)), py::cast(std::get<3>(res)));
              })
         .def(
             "_getScanContext",
