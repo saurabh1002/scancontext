@@ -29,7 +29,7 @@ import numpy as np
 
 
 class NewerCollegeDataset:
-    def __init__(self, data_dir: Path, overlap_threshold: float, *_, **__):
+    def __init__(self, data_dir: Path, *_, **__):
         try:
             self.PyntCloud = importlib.import_module("pyntcloud").PyntCloud
         except ModuleNotFoundError:
@@ -37,7 +37,6 @@ class NewerCollegeDataset:
 
         self.data_dir = os.path.join(data_dir, "")
         self.scan_folder = os.path.join(self.data_dir, "raw_format/ouster_scan")
-        self.pose_file = os.path.join(self.data_dir, "ground_truth/registered_poses.csv")
         self.sequence_id = os.path.basename(data_dir)
 
         # Load scan files and poses
@@ -46,12 +45,6 @@ class NewerCollegeDataset:
             self.gt_closure_indices = np.loadtxt(
                 os.path.join(self.data_dir, "loop_closure", "gt_closures.txt")
             )
-            self.gt_closure_overlap_scores = np.loadtxt(
-                os.path.join(self.data_dir, "loop_closure", "gt_overlaps.txt")
-            )
-            self.gt_closure_indices = self.gt_closure_indices[
-                np.where(self.gt_closure_overlap_scores > overlap_threshold)[0]
-            ]
         except FileNotFoundError:
             self.gt_closure_indices = None
 

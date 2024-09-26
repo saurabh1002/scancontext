@@ -30,7 +30,7 @@ import numpy as np
 class NCLTDataset:
     """Adapted from PyLidar-SLAM"""
 
-    def __init__(self, data_dir: Path, overlap_threshold: float, *_, **__):
+    def __init__(self, data_dir: Path, *_, **__):
         self.sequence_id = os.path.basename(data_dir)
         self.data_dir = os.path.join(os.path.realpath(data_dir), "")
         self.scans_dir = os.path.join(self.data_dir, "velodyne_sync")
@@ -50,12 +50,6 @@ class NCLTDataset:
             self.gt_closure_indices = np.loadtxt(
                 os.path.join(self.data_dir, "loop_closure", "gt_closures.txt")
             )
-            self.gt_closure_overlap_scores = np.loadtxt(
-                os.path.join(self.data_dir, "loop_closure", "gt_overlaps.txt")
-            )
-            self.gt_closure_indices = self.gt_closure_indices[
-                np.where(self.gt_closure_overlap_scores > overlap_threshold)[0]
-            ]
         except FileNotFoundError:
             self.gt_closure_indices = None
 

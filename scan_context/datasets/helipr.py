@@ -1,7 +1,7 @@
 # MIT License
 #
-# Copyright (c) 2022 Ignacio Vizzo, Tiziano Guadagnino, Benedikt Mersch, Cyrill
-# Stachniss.
+# Copyright (c) 2024 Saurabh Gupta, Ignacio Vizzo, Tiziano Guadagnino,
+# Benedikt Mersch, Cyrill Stachniss.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,19 +25,23 @@ import os
 from pathlib import Path
 
 import numpy as np
+import open3d as o3d
 
 
-class MulranDataset:
-    def __init__(self, data_dir: Path, *_, **__):
+class HeLiPRDataset:
+    def __init__(self, data_dir: Path, sequence: str, *_, **__):
+        self.sequence_id = f"{os.path.basename(data_dir)}_{sequence}"
         self.data_dir = os.path.realpath(data_dir)
-        self.sequence_id = os.path.basename(data_dir)
-        self.velodyne_dir = os.path.join(self.data_dir, "Ouster/")
+        self.sequence_dir = os.path.join(self.data_dir, "LiDAR", sequence)
+        self.scan_files = sorted(glob.glob(self.sequence_dir + "/*.ply"))
 
-        self.scan_files = sorted(glob.glob(self.velodyne_dir + "*.bin"))
+        self.gt_file = os.path.join(self.data_dir, "LiDAR_GT", f"global_{sequence}_gt.txt")
 
+        if len(self.scan_files) == 0:
+            raise ValueError(f"Tried to read point cloud files in {data_dir} but none found")
         try:
             self.gt_closure_indices = np.loadtxt(
-                os.path.join(self.data_dir, "loop_closure", "gt_closures.txt")
+                os.path.join(self.sequence_dir, "loop_closure", "gt_closures.txt")
             )
         except FileNotFoundError:
             self.gt_closure_indices = None
@@ -46,8 +50,14 @@ class MulranDataset:
         return len(self.scan_files)
 
     def __getitem__(self, idx):
-        return self.read_point_cloud(self.scan_files[idx])
+        return self.read_point_cloud(idx)
 
-    def read_point_cloud(self, file_path: str):
-        points = np.fromfile(file_path, dtype=np.float32).reshape((-1, 4))[:, :3]
+    def get_data(self, idx: int):
+        file_path = self.scan_files[idx]
+        pcd = o3d.io.read_point_cloud(file_path)
+        return np.asarray(pcd.points)
+
+    def read_point_cloud(self, idx: int):
+        data = self.get_data(idx)
+        points = data[:, :3]
         return points.astype(np.float64)
