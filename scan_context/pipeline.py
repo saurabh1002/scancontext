@@ -103,10 +103,10 @@ class ScanContextPipeline:
             return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         results_dir = os.path.join(
-            self.results_dir, "scan_context_results", self.dataset_name, get_timestamp()
+            self.results_dir,  f"{self.dataset_name}_results", get_timestamp()
         )
         latest_dir = os.path.join(
-            self.results_dir, "scan_context_results", self.dataset_name, "latest"
+            self.results_dir, f"{self.dataset_name}_results", "latest"
         )
         os.makedirs(results_dir, exist_ok=True)
         os.unlink(latest_dir) if os.path.exists(latest_dir) or os.path.islink(latest_dir) else None

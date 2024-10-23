@@ -55,4 +55,4 @@ class GenericDataset:
         points, intensity = pointcloud.positions.numpy(), pointcloud.intensity.numpy()
         intensity = intensity / intensity.max()
         keep_ind = np.where(intensity > 0.25)[0]
-        return points[keep_ind].astype(np.float64), intensity[keep_ind]
+        return points[keep_ind].astype(np.float64)
