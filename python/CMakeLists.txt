@@ -19,19 +19,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from setuptools import find_packages
-from skbuild import setup
+project(ScanContext)
 
-setup(
-    packages=find_packages(),
-    cmake_install_dir="pybind/",
-    cmake_install_target="install_python_bindings",
-    entry_points={"console_scripts": ["scan_context_pipeline=scan_context.tools.cmd:run"]},
-    install_requires=[
-        "numpy",
-        "typer[all]>=0.6.0",
-        "open3d>=0.13",
-        "tqdm",
-        "plyfile",
-    ],
-)
+cmake_minimum_required(VERSION 3.16...3.26)
+
+set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+option(USE_SYSTEM_EIGEN "Use Eigen3 from the system" OFF)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../cpp ${CMAKE_CURRENT_BINARY_DIR}/scan_context)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/scan_context/pybind)

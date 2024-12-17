@@ -19,15 +19,26 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-project(ScanContext)
 
-cmake_minimum_required(VERSION 3.16...3.26)
+from typing import Tuple
 
-set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+import numpy as np
 
-option(USE_SYSTEM_EIGEN "Use Eigen3 from the system" OFF)
+from scan_context.pybind import scan_context_pybind
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cpp)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/pybind)
+
+class ScanContext:
+    def __init__(self) -> None:
+        self._pipeline = scan_context_pybind._SCManager()
+
+    def process_new_scan(self, scan: np.ndarray) -> None:
+        scan = scan_context_pybind._VectorEigen3d(scan)
+        self._pipeline._makeAndSaveScancontextAndKeys(scan)
+
+    def check_for_closure(self) -> Tuple[int, np.ndarray, np.ndarray, np.ndarray]:
+        query_node_idx, candidate_ids, candidate_dists, candidate_yaws = self._pipeline._detectLoopClosureID()
+        return query_node_idx, np.asarray(candidate_ids, int), np.asarray(candidate_dists), np.asarray(candidate_yaws)
+
+    def get_scan_context(self, idx: int) -> np.ndarray:
+        scan_context = self._pipeline._getScanContext(idx)
+        return np.asarray(scan_context)
