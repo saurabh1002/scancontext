@@ -33,6 +33,12 @@ from scan_context.tools.progress_bar import get_progress_bar
 from scan_context.tools.visualization import draw_scan_context
 
 
+def scan_to_map(scan_query, scan_ref, local_maps_scan_range):
+    map_query = np.where((scan_query >= local_maps_scan_range[:, 0]) & (scan_query < local_maps_scan_range[:, 1]))[0][0]
+    map_ref = np.where((scan_ref >= local_maps_scan_range[:, 0]) & (scan_ref < local_maps_scan_range[:, 1]))[0][0]
+    return map_query, map_ref
+
+
 class ScanContextPipeline:
     def __init__(
         self,
@@ -52,8 +58,9 @@ class ScanContextPipeline:
 
         self.closures = []
         self.gt_closure_indices = self._dataset.gt_closure_indices
+        self.local_maps_scan_range = self._dataset.local_maps_scan_range
 
-        scan_context_thresholds = np.arange(0.1, 1.0, 0.05)
+        scan_context_thresholds = np.arange(0.1, 1.1, 0.1)
         self.results = PipelineResults(
             self.gt_closure_indices, self.dataset_name, scan_context_thresholds
         )
@@ -83,10 +90,12 @@ class ScanContextPipeline:
                     )
             if query_idx != -1:
                 for candidate_id, dist, yaw in zip(candidate_ids, candidate_dists, candidate_yaws):
-                    if dist < 0.4:
-                        relative_tf = np.array([[np.cos(yaw), -np.sin(yaw), 0, 0], [np.sin(yaw), np.cos(yaw), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-                        self.closures.append(np.r_[candidate_id, query_idx, relative_tf.flatten()])
-                    self.results.append(query_idx, candidate_id, dist)
+                    map_query, map_ref = scan_to_map(query_idx, candidate_id, self.local_maps_scan_range)
+                    if(map_query - map_ref > 3):
+                        self.results.append(map_ref, map_query, dist)
+                        if dist < 0.4:
+                            relative_tf = np.array([[np.cos(yaw), -np.sin(yaw), 0, 0], [np.sin(yaw), np.cos(yaw), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+                            self.closures.append(np.r_[candidate_id, query_idx, relative_tf.flatten()])
 
     def _run_evaluation(self) -> None:
         self.results.compute_metrics()
@@ -95,7 +104,6 @@ class ScanContextPipeline:
         self.results_dir = self._create_results_dir()
         if self.gt_closure_indices is not None:
             self.results.log_to_file_pr(os.path.join(self.results_dir, "metrics.txt"))
-        self.results.log_to_file_closures(self.results_dir)
         np.savetxt(os.path.join(self.results_dir, "closures.txt"), np.asarray(self.closures))
 
     def _create_results_dir(self) -> Path:

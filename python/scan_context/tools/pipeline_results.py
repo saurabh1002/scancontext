@@ -55,11 +55,9 @@ class PipelineResults:
         self._dataset_name = dataset_name
         self._scan_context_thresholds = scan_context_thresholds
 
-        self.predicted_closures: Dict[float, Set[Tuple[int]]] = {}
-        for threshold in self._scan_context_thresholds:
-            self.predicted_closures[threshold] = set()
-
-        self.metrics: Dict[float, Metrics] = {}
+        self.closure_list: List[Tuple[int]] = []
+        self.distances_list: List[float] = []
+        self.metrics = []
 
         gt_closures = gt_closures if gt_closures.shape[1] == 2 else gt_closures.T
         self.gt_closures: Set[Tuple[int]] = set(map(lambda x: tuple(sorted(x)), gt_closures))
@@ -68,25 +66,25 @@ class PipelineResults:
         if self.metrics:
             self.log_to_console()
 
-    def append(self, query_idx: int, nn_idx: int, dist: float) -> None:
-        indices = np.where(dist < self._scan_context_thresholds)[0]
-        for index in indices:
-            self.predicted_closures[self._scan_context_thresholds[index]].add((nn_idx, query_idx))
+    def append(self, source_id: int, target_id: int, dist: float) -> None:
+        self.distances_list.append(dist)
+        self.closure_list.append((source_id, target_id))
 
     def compute_metrics(
         self,
     ) -> None:
-        for key in self._scan_context_thresholds:
-            closures = self.predicted_closures[key]
-            closures = set(map(lambda x: tuple(sorted(x)), closures))
+        for threshold in self._scan_context_thresholds:
+            closures = set()
+            for closure_indices, dist in zip(self.closure_list, self.distances_list):
+                if dist <= threshold:
+                    closures.add(closure_indices)
             tp = len(self.gt_closures.intersection(closures))
             fp = len(closures) - tp
             fn = len(self.gt_closures) - tp
-            self.metrics[key] = Metrics(tp, fp, fn)
+            self.metrics.append(Metrics(tp, fp, fn))
 
     def _rich_table_pr(self, table_format: box.Box = box.HORIZONTALS) -> Table:
         table = Table(box=table_format, title=self._dataset_name)
-        table.caption = f"Loop Closure Distance Threshold:"
         table.add_column("Scan Context Threshold", justify="center", style="cyan")
         table.add_column("True Positives", justify="center", style="magenta")
         table.add_column("False Positives", justify="center", style="magenta")
@@ -94,7 +92,7 @@ class PipelineResults:
         table.add_column("Precision", justify="left", style="green")
         table.add_column("Recall", justify="left", style="green")
         table.add_column("F1 score", justify="left", style="green")
-        for [threshold, metric] in self.metrics.items():
+        for threshold, metric in zip(self._scan_context_thresholds, self.metrics):
             table.add_row(
                 f"{threshold:.4f}",
                 f"{metric.tp}",
@@ -114,9 +112,3 @@ class PipelineResults:
         with open(filename, "wt") as logfile:
             console = Console(file=logfile, width=100, force_jupyter=False)
             console.print(self._rich_table_pr(table_format=box.ASCII_DOUBLE_HEAD))
-
-    def log_to_file_closures(self, result_dir) -> None:
-        np.save(
-            os.path.join(result_dir, f"predicted_closures.npy"),
-            self.predicted_closures,
-        )
