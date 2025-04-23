@@ -34,8 +34,12 @@ from scan_context.tools.visualization import draw_scan_context
 
 
 def scan_to_map(scan_query, scan_ref, local_maps_scan_range):
-    map_query = np.where((scan_query >= local_maps_scan_range[:, 0]) & (scan_query < local_maps_scan_range[:, 1]))[0][0]
-    map_ref = np.where((scan_ref >= local_maps_scan_range[:, 0]) & (scan_ref < local_maps_scan_range[:, 1]))[0][0]
+    map_query = np.where(
+        (scan_query >= local_maps_scan_range[:, 0]) & (scan_query < local_maps_scan_range[:, 1])
+    )[0][0]
+    map_ref = np.where(
+        (scan_ref >= local_maps_scan_range[:, 0]) & (scan_ref < local_maps_scan_range[:, 1])
+    )[0][0]
     return map_query, map_ref
 
 
@@ -79,7 +83,9 @@ class ScanContextPipeline:
         for query_idx in get_progress_bar(self._first + 1, self._last):
             scan = self._dataset[query_idx]
             self.scan_context.process_new_scan(scan)
-            query_idx, candidate_ids, candidate_dists, candidate_yaws = self.scan_context.check_for_closure()
+            query_idx, candidate_ids, candidate_dists, candidate_yaws = (
+                self.scan_context.check_for_closure()
+            )
             if self._visualize:
                 for candidate_id in candidate_ids:
                     draw_scan_context(
@@ -90,12 +96,23 @@ class ScanContextPipeline:
                     )
             if query_idx != -1:
                 for candidate_id, dist, yaw in zip(candidate_ids, candidate_dists, candidate_yaws):
-                    map_query, map_ref = scan_to_map(query_idx, candidate_id, self.local_maps_scan_range)
-                    if(map_query - map_ref > 3):
+                    map_query, map_ref = scan_to_map(
+                        query_idx, candidate_id, self.local_maps_scan_range
+                    )
+                    if map_query - map_ref > 3:
                         self.results.append(map_ref, map_query, dist)
                         if dist < 0.4:
-                            relative_tf = np.array([[np.cos(yaw), -np.sin(yaw), 0, 0], [np.sin(yaw), np.cos(yaw), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-                            self.closures.append(np.r_[candidate_id, query_idx, relative_tf.flatten()])
+                            relative_tf = np.array(
+                                [
+                                    [np.cos(yaw), -np.sin(yaw), 0, 0],
+                                    [np.sin(yaw), np.cos(yaw), 0, 0],
+                                    [0, 0, 1, 0],
+                                    [0, 0, 0, 1],
+                                ]
+                            )
+                            self.closures.append(
+                                np.r_[candidate_id, query_idx, relative_tf.flatten()]
+                            )
 
     def _run_evaluation(self) -> None:
         self.results.compute_metrics()
@@ -111,11 +128,9 @@ class ScanContextPipeline:
             return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         results_dir = os.path.join(
-            self.results_dir,  f"{self.dataset_name}_results", get_timestamp()
+            self.results_dir, f"{self.dataset_name}_results", get_timestamp()
         )
-        latest_dir = os.path.join(
-            self.results_dir, f"{self.dataset_name}_results", "latest"
-        )
+        latest_dir = os.path.join(self.results_dir, f"{self.dataset_name}_results", "latest")
         os.makedirs(results_dir, exist_ok=True)
         os.unlink(latest_dir) if os.path.exists(latest_dir) or os.path.islink(latest_dir) else None
         os.symlink(results_dir, latest_dir)
