@@ -31,9 +31,8 @@ import open3d as o3d
 class IPBCarDataset:
     def __init__(self, data_dir: Path, *_, **__):
         self.sequence_id = os.path.basename(data_dir)
-        self.sequence_dir = os.path.realpath(data_dir)
-        self.scans_dir = os.path.join(self.sequence_dir, "points")
-        self.scan_files = sorted(glob.glob(self.scans_dir + "/*.ply"))
+        self.sequence_dir = os.path.join(data_dir, "points")
+        self.scan_files = sorted(glob.glob(self.sequence_dir + "/*.ply"))
 
         self.gt_file = os.path.join(self.sequence_dir, "poses.npy")
         self.gt_poses = self.load_poses(self.gt_file)
