@@ -84,23 +84,10 @@ class PipelineResults:
             self.metrics.append(Metrics(tp, fp, fn))
 
     def _rich_table_pr(self, table_format: box.Box = box.HORIZONTALS) -> Table:
-        table = Table(box=table_format, title=self._dataset_name)
-        table.add_column("Scan Context Threshold", justify="center", style="cyan")
-        table.add_column("True Positives", justify="center", style="magenta")
-        table.add_column("False Positives", justify="center", style="magenta")
-        table.add_column("False Negatives", justify="center", style="magenta")
-        table.add_column("Precision", justify="left", style="green")
-        table.add_column("Recall", justify="left", style="green")
-        table.add_column("F1 score", justify="left", style="green")
+        table = Table(box=table_format)
         for threshold, metric in zip(self._scan_context_thresholds, self.metrics):
             table.add_row(
-                f"{threshold:.4f}",
-                f"{metric.tp}",
-                f"{metric.fp}",
-                f"{metric.fn}",
-                f"{metric.precision:.4f}",
-                f"{metric.recall:.4f}",
-                f"{metric.F1:.4f}",
+                f"{threshold:.4f} {metric.tp} {metric.fp} {metric.fn} {metric.precision:.4f} {metric.recall:.4f} {metric.F1:.4f}"
             )
         return table
 
