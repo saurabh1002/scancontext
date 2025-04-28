@@ -34,7 +34,7 @@ class IPBCarDataset:
         self.sequence_dir = os.path.join(data_dir, "points")
         self.scan_files = sorted(glob.glob(self.sequence_dir + "/*.ply"))
 
-        self.gt_file = os.path.join(self.sequence_dir, "poses.npy")
+        self.gt_file = os.path.join(data_dir, "poses.npy")
         self.gt_poses = self.load_poses(self.gt_file)
 
         try:
