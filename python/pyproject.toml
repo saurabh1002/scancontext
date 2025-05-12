@@ -9,6 +9,7 @@ requires-python = ">=3.7"
 
 [project.scripts]
 scan_context_pipeline = "scan_context.tools.cmd:run"
+scan_context_multisession_pipeline = "scan_context.tools.cmd:run_multisession"
 
 [tool.scikit-build]
 build-dir = "build/{wheel_tag}"

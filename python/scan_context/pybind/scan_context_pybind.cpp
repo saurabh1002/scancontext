@@ -57,10 +57,18 @@ PYBIND11_MODULE(scan_context_pybind, m) {
              "_scan_down"_a)
         .def("_detectLoopClosureID",
              [](SCManager &self) {
-                 auto res = self.detectLoopClosureID();
+                 const auto &res = self.detectLoopClosureID();
                  return std::make_tuple(std::get<0>(res), py::cast(std::get<1>(res)),
                                         py::cast(std::get<2>(res)), py::cast(std::get<3>(res)));
              })
+        .def(
+            "_detectInterSessionLoopClosureID",
+            [](SCManager &self, const std::vector<Eigen::Vector3d> &scan) {
+                const auto &res = self.detectInterSessionLoopClosureID(scan);
+                return std::make_tuple(py::cast(std::get<0>(res)), py::cast(std::get<1>(res)),
+                                       py::cast(std::get<2>(res)));
+            },
+            "scan"_a)
         .def(
             "_getScanContext",
             [](const SCManager &self, int idx) { return self.polarcontexts_[idx]; }, "idx"_a);

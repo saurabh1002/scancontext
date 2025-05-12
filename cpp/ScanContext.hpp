@@ -40,14 +40,16 @@ public:
     void makeAndSaveScancontextAndKeys(const std::vector<Eigen::Vector3d> &_scan_down);
     std::tuple<int, std::vector<size_t>, std::vector<double>, std::vector<double>>
     detectLoopClosureID();  // int: query node index, int: nearest node index, float: sc distance,
-                            // float: relative yaw
+    // float: relative yaw
+    std::tuple<std::vector<size_t>, std::vector<double>, std::vector<double>>
+    detectInterSessionLoopClosureID(const std::vector<Eigen::Vector3d> &scan);
 
 public:
     // hyper parameters ()
     const double LIDAR_HEIGHT =
-        2.0;  // lidar height : add this for simply directly using lidar scan in the lidar local
-              // coord (not robot base coord) / if you use robot-coord-transformed lidar scans, just
-              // set this as 0.
+        2.0;  // lidar height : add this for simply directly using lidar scan in
+              // the lidar local coord (not robot base coord) / if you use
+              // robot-coord-transformed lidar scans, just set this as 0.
 
     const int PC_NUM_RING = 20;         // 20 in the original paper (IROS 18)
     const int PC_NUM_SECTOR = 60;       // 60 in the original paper (IROS 18)

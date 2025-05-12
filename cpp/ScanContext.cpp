@@ -198,7 +198,63 @@ void SCManager::makeAndSaveScancontextAndKeys(const std::vector<Vector3d> &_scan
 
 }  // SCManager::makeAndSaveScancontextAndKeys
 
-std::tuple<int, std::vector<size_t>, std::vector<double>, std::vector<double>> SCManager::detectLoopClosureID() {
+std::tuple<std::vector<size_t>, std::vector<double>, std::vector<double>>
+SCManager::detectInterSessionLoopClosureID(const std::vector<Eigen::Vector3d> &scan) {
+    MatrixXd curr_desc = makeScancontext(scan);  // v1
+    MatrixXd ringkey = makeRingkeyFromScancontext(curr_desc);
+    MatrixXd sectorkey = makeSectorkeyFromScancontext(curr_desc);
+    std::vector<float> curr_key = eig2stdvec(ringkey);
+
+    // knn search
+    std::vector<size_t> candidate_indexes(NUM_CANDIDATES_FROM_TREE);
+    std::vector<float> out_dists_sqr(NUM_CANDIDATES_FROM_TREE);
+    std::vector<double> candidate_dists(NUM_CANDIDATES_FROM_TREE);
+    std::vector<double> candidate_yaws(NUM_CANDIDATES_FROM_TREE);
+    /*
+     * step 1: candidates from ringkey tree_
+     */
+
+    // tree_ reconstruction (not mandatory to make everytime)
+    if (tree_making_period_conter % TREE_MAKING_PERIOD_ == 0)  // to save computation cost
+    {
+        polarcontext_invkeys_to_search_.clear();
+        polarcontext_invkeys_to_search_.assign(polarcontext_invkeys_mat_.begin(),
+                                               polarcontext_invkeys_mat_.end());
+
+        polarcontext_tree_.reset();
+        polarcontext_tree_ = std::make_unique<InvKeyTree>(
+            PC_NUM_RING /* dim */, polarcontext_invkeys_to_search_, 10 /* max leaf */);
+        // tree_point3dr_->index->buildIndex(); // inernally called in the constructor of InvKeyTree
+        // (for detail, refer the nanoflann and KDtreeVectorOfVectorsAdapoint3dor)
+    }
+    tree_making_period_conter = tree_making_period_conter + 1;
+
+    double min_dist = 10000000;  // init with somthing large
+    int nn_align = 0;
+    int nn_idx = 0;
+
+    nanoflann::KNNResultSet<float> knnsearch_result(NUM_CANDIDATES_FROM_TREE);
+    knnsearch_result.init(&candidate_indexes[0], &out_dists_sqr[0]);
+    polarcontext_tree_->index->findNeighbors(knnsearch_result, &curr_key[0] /* query */,
+                                             nanoflann::SearchParams(10));
+
+    /*
+     *  step 2: pairwise distance (find opoint3dimal columnwise best-fit using cosine distance)
+     */
+    for (int candidate_iter_idx = 0; candidate_iter_idx < NUM_CANDIDATES_FROM_TREE;
+         candidate_iter_idx++) {
+        MatrixXd polarcontext_candidate = polarcontexts_[candidate_indexes[candidate_iter_idx]];
+        std::pair<double, int> sc_dist_result =
+            distanceBtnScanContext(curr_desc, polarcontext_candidate);
+
+        candidate_dists[candidate_iter_idx] = sc_dist_result.first;
+        candidate_yaws[candidate_iter_idx] = deg2rad(sc_dist_result.second * PC_UNIT_SECTORANGLE);
+    }
+    return {candidate_indexes, candidate_dists, candidate_yaws};
+}
+
+std::tuple<int, std::vector<size_t>, std::vector<double>, std::vector<double>>
+SCManager::detectLoopClosureID() {
     auto curr_key = polarcontext_invkeys_mat_.back();  // current observation (query)
     auto curr_desc = polarcontexts_.back();            // current observation (query)
 

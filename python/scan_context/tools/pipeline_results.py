@@ -51,8 +51,7 @@ class Metrics:
 
 
 class PipelineResults:
-    def __init__(self, gt_closures: np.ndarray, dataset_name: str, scan_context_thresholds) -> None:
-        self._dataset_name = dataset_name
+    def __init__(self, gt_closures: np.ndarray, scan_context_thresholds) -> None:
         self._scan_context_thresholds = scan_context_thresholds
 
         self.closure_list: List[Tuple[int]] = []
