@@ -20,17 +20,14 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import datetime
 import os
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 
 from scan_context.scan_context import ScanContext
 from scan_context.tools.pipeline_results import PipelineResults
 from scan_context.tools.progress_bar import get_progress_bar
-from scan_context.tools.visualization import draw_scan_context
 
 
 def scan_to_map(scan_query, scan_ref, query_local_maps_scan_range, ref_local_maps_scan_range):
