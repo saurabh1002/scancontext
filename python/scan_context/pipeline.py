@@ -66,7 +66,7 @@ class ScanContextPipeline:
 
         scan_context_thresholds = np.arange(0.1, 1.1, 0.1)
         self.results = PipelineResults(
-            self.gt_closure_indices, self.dataset_name, scan_context_thresholds
+            self.gt_closure_indices, scan_context_thresholds
         )
 
     def run(self):
